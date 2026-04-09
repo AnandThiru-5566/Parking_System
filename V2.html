@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parking Management System - Version 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1000px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    h2, h3 {
+      text-align: center;
+      color: #333;
+    }
+
+    .form-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .box {
+      background: #fafafa;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .exit-btn {
+      background: #dc3545;
+    }
+
+    .exit-btn:hover {
+      background: #b02a37;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+      font-weight: bold;
+    }
+
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 30px;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    .status-parked {
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-exited {
+      color: red;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .form-section {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Parking Management System - Version 2</h2>
+
+    <div class="form-section">
+      <!-- Add Vehicle -->
+      <div class="box">
+        <h3>Add Vehicle Entry</h3>
+        <form id="entryForm">
+          <label for="vehicleNumber">Vehicle Number</label>
+          <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" required>
+
+          <label for="ownerName">Owner Name</label>
+          <input type="text" id="ownerName" placeholder="Enter owner name" required>
+
+          <label for="vehicleType">Vehicle Type</label>
+          <select id="vehicleType" required>
+            <option value="">Select vehicle type</option>
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+            <option value="Truck">Truck</option>
+          </select>
+
+          <label for="slotNumber">Slot Number</label>
+          <input type="text" id="slotNumber" placeholder="Enter slot number" required>
+
+          <button type="submit">Record Entry</button>
+        </form>
+
+        <div id="entryMessage" class="message success"></div>
+      </div>
+
+      <!-- Exit Vehicle -->
+      <div class="box">
+        <h3>Exit Vehicle</h3>
+        <form id="exitForm">
+          <label for="exitVehicleNumber">Vehicle Number</label>
+          <input type="text" id="exitVehicleNumber" placeholder="Enter vehicle number to exit" required>
+
+          <button type="submit" class="exit-btn">Record Exit</button>
+        </form>
+
+        <div id="exitMessage" class="message"></div>
+      </div>
+    </div>
+
+    <table id="vehicleTable">
+      <thead>
+        <tr>
+          <th>Vehicle Number</th>
+          <th>Owner Name</th>
+          <th>Vehicle Type</th>
+          <th>Slot Number</th>
+          <th>Entry Time</th>
+          <th>Exit Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const entryForm = document.getElementById("entryForm");
+    const exitForm = document.getElementById("exitForm");
+    const tableBody = document.querySelector("#vehicleTable tbody");
+    const entryMessage = document.getElementById("entryMessage");
+    const exitMessage = document.getElementById("exitMessage");
+
+    let vehicleRecords = [];
+
+    // Add Vehicle Entry
+    entryForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const vehicleNumber = document.getElementById("vehicleNumber").value.trim().toUpperCase();
+      const ownerName = document.getElementById("ownerName").value.trim();
+      const vehicleType = document.getElementById("vehicleType").value;
+      const slotNumber = document.getElementById("slotNumber").value.trim().toUpperCase();
+      const entryTime = new Date().toLocaleString();
+
+      const alreadyExists = vehicleRecords.find(
+        vehicle => vehicle.vehicleNumber === vehicleNumber && vehicle.status === "Parked"
+      );
+
+      if (alreadyExists) {
+        entryMessage.style.display = "block";
+        entryMessage.className = "message error";
+        entryMessage.textContent = "This vehicle is already parked.";
+        return;
+      }
+
+      const vehicle = {
+        vehicleNumber,
+        ownerName,
+        vehicleType,
+        slotNumber,
+        entryTime,
+        exitTime: "-",
+        status: "Parked"
+      };
+
+      vehicleRecords.push(vehicle);
+      updateTable();
+
+      entryMessage.style.display = "block";
+      entryMessage.className = "message success";
+      entryMessage.textContent = "Vehicle entry recorded successfully.";
+
+      entryForm.reset();
+    });
+
+    // Exit Vehicle
+    exitForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const exitVehicleNumber = document.getElementById("exitVehicleNumber").value.trim().toUpperCase();
+      const vehicle = vehicleRecords.find(
+        v => v.vehicleNumber === exitVehicleNumber && v.status === "Parked"
+      );
+
+      if (vehicle) {
+        vehicle.exitTime = new Date().toLocaleString();
+        vehicle.status = "Exited";
+
+        updateTable();
+
+        exitMessage.style.display = "block";
+        exitMessage.className = "message success";
+        exitMessage.textContent = "Vehicle exit recorded successfully.";
+      } else {
+        exitMessage.style.display = "block";
+        exitMessage.className = "message error";
+        exitMessage.textContent = "Vehicle not found or already exited.";
+      }
+
+      exitForm.reset();
+    });
+
+    // Update Table
+    function updateTable() {
+      tableBody.innerHTML = "";
+
+      vehicleRecords.forEach(vehicle => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${vehicle.vehicleNumber}</td>
+          <td>${vehicle.ownerName}</td>
+          <td>${vehicle.vehicleType}</td>
+          <td>${vehicle.slotNumber}</td>
+          <td>${vehicle.entryTime}</td>
+          <td>${vehicle.exitTime}</td>
+          <td class="${vehicle.status === 'Parked' ? 'status-parked' : 'status-exited'}">${vehicle.status}</td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+    }
+  </script>
+
+</body>
+</html>
