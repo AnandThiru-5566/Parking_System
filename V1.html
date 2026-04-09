@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parking Management System - Add Vehicle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 500px;
+      margin: 40px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .output {
+      margin-top: 25px;
+      background: #eef5ff;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .output p {
+      margin: 8px 0;
+      font-size: 15px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 25px;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Add Vehicle Entry</h2>
+
+    <form id="vehicleForm">
+      <label for="vehicleNumber">Vehicle Number</label>
+      <input type="text" id="vehicleNumber" placeholder="Enter vehicle number" required>
+
+      <label for="ownerName">Owner Name</label>
+      <input type="text" id="ownerName" placeholder="Enter owner name" required>
+
+      <label for="vehicleType">Vehicle Type</label>
+      <select id="vehicleType" required>
+        <option value="">Select vehicle type</option>
+        <option value="Car">Car</option>
+        <option value="Bike">Bike</option>
+        <option value="Truck">Truck</option>
+      </select>
+
+      <label for="slotNumber">Slot Number</label>
+      <input type="text" id="slotNumber" placeholder="Enter slot number" required>
+
+      <button type="submit">Record Entry</button>
+    </form>
+
+    <div class="output" id="outputBox">
+      <h3>Vehicle Entry Recorded</h3>
+      <p><strong>Vehicle Number:</strong> <span id="outVehicleNumber"></span></p>
+      <p><strong>Owner Name:</strong> <span id="outOwnerName"></span></p>
+      <p><strong>Vehicle Type:</strong> <span id="outVehicleType"></span></p>
+      <p><strong>Slot Number:</strong> <span id="outSlotNumber"></span></p>
+      <p><strong>Entry Time:</strong> <span id="outEntryTime"></span></p>
+    </div>
+
+    <table id="vehicleTable">
+      <thead>
+        <tr>
+          <th>Vehicle Number</th>
+          <th>Owner Name</th>
+          <th>Vehicle Type</th>
+          <th>Slot Number</th>
+          <th>Entry Time</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const form = document.getElementById("vehicleForm");
+    const outputBox = document.getElementById("outputBox");
+    const tableBody = document.querySelector("#vehicleTable tbody");
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      const ownerName = document.getElementById("ownerName").value;
+      const vehicleType = document.getElementById("vehicleType").value;
+      const slotNumber = document.getElementById("slotNumber").value;
+      const entryTime = new Date().toLocaleString();
+
+      document.getElementById("outVehicleNumber").textContent = vehicleNumber;
+      document.getElementById("outOwnerName").textContent = ownerName;
+      document.getElementById("outVehicleType").textContent = vehicleType;
+      document.getElementById("outSlotNumber").textContent = slotNumber;
+      document.getElementById("outEntryTime").textContent = entryTime;
+
+      outputBox.style.display = "block";
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${vehicleNumber}</td>
+        <td>${ownerName}</td>
+        <td>${vehicleType}</td>
+        <td>${slotNumber}</td>
+        <td>${entryTime}</td>
+      `;
+      tableBody.appendChild(row);
+
+      form.reset();
+    });
+  </script>
+
+</body>
+</html>
